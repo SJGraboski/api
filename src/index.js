@@ -22,10 +22,31 @@ const resolvers = require('./resolvers')
 const server = new ApolloServer({ 
     typeDefs, 
     resolvers,
-    context: () =>  { 
-        return { models }
+    context: ({req}) =>  { 
+        // get token from the headers
+        const token = req.headers.authorization;
+        // retrieve a user with the token
+        const user = getUser(token);
+        // for now, let's log the user to the console
+        console.log(user);
+        // add the db models and the user to the context
+        return { models, user };
     }
 });
+
+// JWT
+const jwt = require('jsonwebtoken');
+
+const getUser = token => {
+    if (token) {
+        try {
+            // return user info from token
+            return jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            throw new Error('Session invalid');
+        }
+    }
+}
 
 // DB connection
 db.connect(DB_HOST);
