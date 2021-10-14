@@ -13,22 +13,27 @@ const models = require('./models');
 // Express
 const express = require('express');
 const app = express();
+const helmet = require('helmet'); // for added security
+const cors = require('cors'); // allow resources to be used by another domain
 
+app.use(helmet());
+app.use(cors());
 
 // Apollo & GraphQL
 const { ApolloServer } = require('apollo-server-express');
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers')
+const depthLimit = require('graphql-depth-limit');
+const { createComplexityLimitRule } = require('graphql-validation-complexity');
 const server = new ApolloServer({ 
     typeDefs, 
     resolvers,
+    validationRules: [depthLimit(5), createComplexityLimitRule(1000)],
     context: ({req}) =>  { 
         // get token from the headers
         const token = req.headers.authorization;
         // retrieve a user with the token
         const user = getUser(token);
-        // for now, let's log the user to the console
-        console.log(user);
         // add the db models and the user to the context
         return { models, user };
     }
