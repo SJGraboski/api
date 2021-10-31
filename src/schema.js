@@ -20,7 +20,7 @@ module.exports = gql`
         favoritedBy: [User!]
     }
     type NoteFeed {
-        notes: [Note]!
+        notes: [Note!]!
         cursor: String!
         hasNextPage: Boolean!
     }
